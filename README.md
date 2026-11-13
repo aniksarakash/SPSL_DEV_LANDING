@@ -103,7 +103,10 @@ the change. Every status on the page says "as of" that date.
 - Touch targets are at least 48 px.
 - When the device asks for reduced motion, the working models do not play by
   themselves and show their result at once. The meaning stays.
-- No third-party requests. Fonts are served from this site.
+- Fonts, images and scripts are served from this site. The one third-party
+  request is Cloudflare Web Analytics, which the Cloudflare zone adds to the
+  page. It sets no cookies. To block it, remove its two hosts from the
+  `Content-Security-Policy` in `server/serve.mjs`.
 
 ## Author
 

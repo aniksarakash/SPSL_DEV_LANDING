@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import logo from '../assets/spsl-logo.webp';
+import logoFilm from '../assets/spsl-logo-ink.mp4?url';
 import Reg from './Reg.astro';
 import RegMark from './RegMark.astro';
 import { jobs, PROOF_DATE, PROOF_DATE_ISO } from '../data/jobs';
@@ -8,15 +9,26 @@ import { jobs, PROOF_DATE, PROOF_DATE_ISO } from '../data/jobs';
 
 <header class="hero sheet">
   <div class="slug small">
-    <Image
-      class="slug__logo"
-      src={logo}
-      alt="Smart Printing Solutions Ltd."
-      widths={[160, 320]}
-      sizes="160px"
-      loading="eager"
-      fetchpriority="high"
-    />
+    <!--
+      The logo. The still image paints at once. The ink film loads after the
+      page and plays on top of it in a loop. The button over the logo pauses
+      the film. Without script, the still image is the logo.
+    -->
+    <div class="logo" data-logo>
+      <Image
+        class="logo__still"
+        src={logo}
+        alt="Smart Printing Solutions Ltd."
+        widths={[184, 368]}
+        sizes="(min-width: 64rem) 184px, 150px"
+        loading="eager"
+        fetchpriority="high"
+      />
+      <video class="logo__film" muted playsinline preload="none" tabindex="-1" aria-hidden="true" disableremoteplayback>
+        <source src={logoFilm} type="video/mp4" />
+      </video>
+      <button class="logo__toggle" type="button" aria-label="Pause the logo animation" aria-pressed="false" hidden></button>
+    </div>
     <p class="slug__note">
       Proof sheet. Two colours on white stock. Proofed <time datetime={PROOF_DATE_ISO}>{PROOF_DATE}</time>.
     </p>
@@ -74,10 +86,56 @@ import { jobs, PROOF_DATE, PROOF_DATE_ISO } from '../data/jobs';
     color: var(--blue);
   }
 
-  .slug__logo {
-    width: clamp(7rem, 5.5rem + 5vw, 10rem);
-    /* The logo file has a white field. Multiply prints it straight onto the stock. */
+  .logo {
+    position: relative;
+    flex: none;
+    width: clamp(7.5rem, 5.6rem + 5.6vw, 11.5rem);
+    aspect-ratio: 576 / 264;
+    /* The logo and its film have a white field. Multiply prints them straight onto the stock. */
     mix-blend-mode: multiply;
+    transition: transform var(--fast) var(--ease-out);
+  }
+
+  .logo:has(.logo__toggle:hover) {
+    transform: translate3d(-1px, -1px, 0);
+  }
+
+  .logo:has(.logo__toggle:active) {
+    transform: scale(0.97);
+  }
+
+  .logo__still {
+    width: 100%;
+    height: auto;
+  }
+
+  /* The film covers the still image only while it plays. */
+  .logo__film {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .logo.is-playing .logo__film {
+    opacity: 1;
+  }
+
+  .logo__toggle {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .slug__note {

@@ -1,9 +1,63 @@
 // Page behaviour that is not specific to one job:
+// 0. the logo plays its ink film,
 // 1. the hero headline's red plate follows the pointer by a few pixels,
 // 2. the colour bar marks the job that is on screen,
 // 3. each working model loads its script when it comes near the screen.
 
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+// 0. The logo film. It loads after the page, so it never delays the first
+// paint. It loops while the logo is on screen. With reduced motion it plays
+// one time and then rests on the still logo. The button over the logo pauses
+// and plays it. A visitor who asked the browser to save data gets the still logo.
+const logo = document.querySelector<HTMLElement>('[data-logo]');
+const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+if (logo && !saveData) {
+  const film = logo.querySelector('video')!;
+  const toggle = logo.querySelector('button')!;
+  let wanted = true;
+  let onScreen = true;
+
+  const sync = (): void => {
+    toggle.setAttribute('aria-pressed', String(!wanted));
+    if (!wanted) logo.classList.remove('is-playing');
+    if (wanted && onScreen && !document.hidden) {
+      film.loop = !reduced.matches;
+      film.play().catch(() => {
+        // The browser refused to play. The still logo stays.
+        wanted = false;
+        sync();
+      });
+    } else {
+      film.pause();
+    }
+  };
+
+  // The film covers the still logo only when it has frames to show.
+  film.addEventListener('playing', () => logo.classList.toggle('is-playing', wanted));
+  // "ended" comes only when the film does not loop: rest on the still logo.
+  film.addEventListener('ended', () => {
+    wanted = false;
+    film.currentTime = 0;
+    sync();
+  });
+  toggle.addEventListener('click', () => {
+    wanted = !wanted;
+    sync();
+  });
+  document.addEventListener('visibilitychange', sync);
+  new IntersectionObserver((entries) => {
+    onScreen = entries[entries.length - 1].isIntersecting;
+    sync();
+  }).observe(logo);
+
+  const start = (): void => {
+    toggle.hidden = false;
+    sync();
+  };
+  if (document.readyState === 'complete') start();
+  else window.addEventListener('load', start, { once: true });
+}
 
 // 1. Hero register follows the pointer (mouse and pen only).
 const hero = document.querySelector<HTMLElement>('.hero__title');

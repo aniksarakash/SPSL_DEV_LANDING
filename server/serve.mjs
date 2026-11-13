@@ -24,6 +24,7 @@ const TYPES = {
   '.avif': 'image/avif',
   '.ico': 'image/x-icon',
   '.woff2': 'font/woff2',
+  '.mp4': 'video/mp4',
   '.txt': 'text/plain; charset=utf-8',
   '.xml': 'application/xml; charset=utf-8',
   '.webmanifest': 'application/manifest+json',
@@ -37,9 +38,11 @@ const SECURITY = {
   'Cross-Origin-Opener-Policy': 'same-origin',
   // Browsers act on this header only when the page came over HTTPS.
   'Strict-Transport-Security': 'max-age=15552000',
-  // The page loads nothing from other origins. Astro inlines its styles and small scripts.
+  // The page itself loads nothing from other origins. Astro inlines its styles and
+  // small scripts. The one exception is Cloudflare Web Analytics: the Cloudflare
+  // zone adds its script to the page, and the script reports to cloudflareinsights.com.
   'Content-Security-Policy':
-    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
 };
 
 async function fileInfo(p) {
@@ -111,6 +114,23 @@ const server = createServer(async (req, res) => {
 
   if (req.headers['if-none-match'] === etag) {
     return send(res, 304, headers);
+  }
+
+  // A part of a file, for video. Safari asks for byte ranges and does not
+  // play a video from a server that cannot send them.
+  headers['Accept-Ranges'] = 'bytes';
+  const range = /^bytes=(\d*)-(\d*)$/.exec(String(req.headers.range || ''));
+  if (range && (range[1] || range[2])) {
+    const start = range[1] ? Number(range[1]) : Math.max(0, info.size - Number(range[2]));
+    const end = range[1] && range[2] ? Math.min(Number(range[2]), info.size - 1) : info.size - 1;
+    if (start > end || start >= info.size) {
+      return send(res, 416, { 'Content-Range': `bytes */${info.size}` });
+    }
+    headers['Content-Range'] = `bytes ${start}-${end}/${info.size}`;
+    headers['Content-Length'] = end - start + 1;
+    res.writeHead(206, { ...SECURITY, ...headers });
+    if (req.method === 'HEAD') return res.end();
+    return createReadStream(file, { start, end }).pipe(res);
   }
 
   const accepts = String(req.headers['accept-encoding'] || '');
