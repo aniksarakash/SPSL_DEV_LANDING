@@ -84,12 +84,12 @@ its turn.
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"primaryColor":"#0C52A3","primaryTextColor":"#0B1317","primaryBorderColor":"#0B1317","lineColor":"#F03C24","secondaryColor":"#F7F9FA","tertiaryColor":"#E9EEF2","edgeLabelBackground":"#F7F9FA","clusterBkg":"#F7F9FA","clusterBorder":"#0C52A3","titleColor":"#0B1317","fontFamily":"Arial, sans-serif"}}}%%
 flowchart LR
-    A(["Request"]) --> B["One HTML file<br/>styles are inside it"]
-    B --> C["One font file<br/>loaded early"]
+    A(["Request"]) --> B["One HTML file.<br/>Styles are inside it."]
+    B --> C["One font file,<br/>loaded early"]
     C --> D{{"First paint<br/>1.1 s on a slow phone"}}
-    D --> E["After the page has loaded<br/>the logo film"]
-    D --> F["When a job comes near the screen<br/>the script of its working model"]
-    D --> G["When a job is far from the screen<br/>the browser does not lay it out"]
+    D --> E["After the page has loaded:<br/>the logo film"]
+    D --> F["When a job comes near the screen:<br/>the script of its working model"]
+    D --> G["While a job is far from the screen:<br/>the browser does not lay it out"]
 
     classDef default fill:#0C52A3,stroke:#0B1317,color:#FFFFFF
     classDef red fill:#F03C24,stroke:#0B1317,color:#FFFFFF
@@ -105,12 +105,11 @@ to Cloudflare, and visitors come down that connection.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"primaryColor":"#0C52A3","primaryTextColor":"#0B1317","primaryBorderColor":"#0B1317","lineColor":"#F03C24","secondaryColor":"#F7F9FA","tertiaryColor":"#E9EEF2","edgeLabelBackground":"#F7F9FA","clusterBkg":"#F7F9FA","clusterBorder":"#0C52A3","titleColor":"#0B1317","fontFamily":"Arial, sans-serif"}}}%%
-flowchart LR
+flowchart TD
     V(["Visitor"]) -- "HTTPS" --> E["Cloudflare edge"]
     E -- "tunnel, opened from inside" --> C
 
     subgraph M["This machine. No inbound ports."]
-        direction LR
         C["cloudflared<br/>Windows service"] -- "HTTP on the loopback address" --> S["Local web server<br/>scheduled task"]
         S --> D[("dist/<br/>the built page")]
     end
@@ -165,11 +164,9 @@ flowchart TD
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"primaryColor":"#0C52A3","primaryTextColor":"#0B1317","primaryBorderColor":"#0B1317","lineColor":"#F03C24","secondaryColor":"#F7F9FA","tertiaryColor":"#E9EEF2","edgeLabelBackground":"#F7F9FA","clusterBkg":"#F7F9FA","clusterBorder":"#0C52A3","titleColor":"#0B1317","fontFamily":"Arial, sans-serif"}}}%%
 flowchart LR
-    E["Edit a file in src/"] --> B["npm run build"]
-    B --> A["Astro builds<br/>static HTML, CSS and scripts"]
-    A --> Z["Brotli and gzip copies<br/>of each text file"]
-    Z --> D[("dist/")]
-    D --> L(["Live at once.<br/>The server reads dist/ on each request."])
+    E["Edit a file<br/>in src/"] --> B["npm run build<br/>Astro makes static<br/>HTML, CSS and scripts"]
+    B --> D[("dist/<br/>with Brotli and<br/>gzip copies")]
+    D --> L(["Live at once.<br/>The server reads dist/<br/>on each request."])
 
     classDef default fill:#0C52A3,stroke:#0B1317,color:#FFFFFF
     classDef red fill:#F03C24,stroke:#0B1317,color:#FFFFFF
