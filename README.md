@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/readme/logo-ink.webp" width="300" alt="Smart Printing Solutions Ltd. The logo forms out of blue ink." />
+<img src="docs/readme/logo-ink.webp" width="340" alt="Smart Printing Solutions Ltd. The logo forms out of blue ink." />
 
 <img src="docs/readme/banner.svg" width="100%" alt="Developments. Five jobs in proof. Software in development at Smart Printing Solutions Ltd. Five projects, all ongoing." />
 
@@ -82,7 +82,7 @@ Only the first screen is needed for the first paint. Everything else waits for
 its turn.
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"primaryColor":"#0C52A3","primaryTextColor":"#FFFFFF","primaryBorderColor":"#0B1317","lineColor":"#F03C24","secondaryColor":"#F7F9FA","tertiaryColor":"#E9EEF2","edgeLabelBackground":"#F7F9FA","clusterBkg":"#F7F9FA","clusterBorder":"#0C52A3","titleColor":"#0B1317","fontFamily":"Arial, sans-serif"}}}%%
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#0C52A3","primaryTextColor":"#0B1317","primaryBorderColor":"#0B1317","lineColor":"#F03C24","secondaryColor":"#F7F9FA","tertiaryColor":"#E9EEF2","edgeLabelBackground":"#F7F9FA","clusterBkg":"#F7F9FA","clusterBorder":"#0C52A3","titleColor":"#0B1317","fontFamily":"Arial, sans-serif"}}}%%
 flowchart LR
     A(["Request"]) --> B["One HTML file<br/>styles are inside it"]
     B --> C["One font file<br/>loaded early"]
@@ -91,6 +91,7 @@ flowchart LR
     D --> F["When a job comes near the screen<br/>the script of its working model"]
     D --> G["When a job is far from the screen<br/>the browser does not lay it out"]
 
+    classDef default fill:#0C52A3,stroke:#0B1317,color:#FFFFFF
     classDef red fill:#F03C24,stroke:#0B1317,color:#FFFFFF
     classDef paper fill:#F7F9FA,stroke:#0C52A3,color:#0B1317
     class D red
@@ -103,7 +104,7 @@ The machine opens no inbound ports. `cloudflared` makes an outbound connection
 to Cloudflare, and visitors come down that connection.
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"primaryColor":"#0C52A3","primaryTextColor":"#FFFFFF","primaryBorderColor":"#0B1317","lineColor":"#F03C24","secondaryColor":"#F7F9FA","tertiaryColor":"#E9EEF2","edgeLabelBackground":"#F7F9FA","clusterBkg":"#F7F9FA","clusterBorder":"#0C52A3","titleColor":"#0B1317","fontFamily":"Arial, sans-serif"}}}%%
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#0C52A3","primaryTextColor":"#0B1317","primaryBorderColor":"#0B1317","lineColor":"#F03C24","secondaryColor":"#F7F9FA","tertiaryColor":"#E9EEF2","edgeLabelBackground":"#F7F9FA","clusterBkg":"#F7F9FA","clusterBorder":"#0C52A3","titleColor":"#0B1317","fontFamily":"Arial, sans-serif"}}}%%
 flowchart LR
     V(["Visitor"]) -- "HTTPS" --> E["Cloudflare edge"]
     E -- "tunnel, opened from inside" --> C
@@ -114,6 +115,7 @@ flowchart LR
         S --> D[("dist/<br/>the built page")]
     end
 
+    classDef default fill:#0C52A3,stroke:#0B1317,color:#FFFFFF
     classDef red fill:#F03C24,stroke:#0B1317,color:#FFFFFF
     classDef paper fill:#FFFFFF,stroke:#0C52A3,color:#0B1317
     class E red
@@ -129,7 +131,7 @@ security headers, and sends a visitor who came over plain HTTP to HTTPS.
 After a power loss or a restart, the page comes back with no sign-in.
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"primaryColor":"#0C52A3","primaryTextColor":"#FFFFFF","primaryBorderColor":"#0B1317","lineColor":"#F03C24","secondaryColor":"#F7F9FA","tertiaryColor":"#E9EEF2","edgeLabelBackground":"#F7F9FA","clusterBkg":"#F7F9FA","clusterBorder":"#0C52A3","titleColor":"#0B1317","fontFamily":"Arial, sans-serif"}}}%%
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#0C52A3","primaryTextColor":"#0B1317","primaryBorderColor":"#0B1317","lineColor":"#F03C24","secondaryColor":"#F7F9FA","tertiaryColor":"#E9EEF2","edgeLabelBackground":"#F7F9FA","clusterBkg":"#F7F9FA","clusterBorder":"#0C52A3","titleColor":"#0B1317","fontFamily":"Arial, sans-serif"}}}%%
 flowchart TD
     P(["Power returns, or Windows restarts"]) --> W["Windows starts"]
     W --> A["Service: cloudflared<br/>automatic, delayed start"]
@@ -146,6 +148,7 @@ flowchart TD
     T -- "yes" --> OK(["The page is live"])
     L -- "yes" --> OK
 
+    classDef default fill:#0C52A3,stroke:#0B1317,color:#FFFFFF
     classDef red fill:#F03C24,stroke:#0B1317,color:#FFFFFF
     classDef paper fill:#F7F9FA,stroke:#0C52A3,color:#0B1317
     class OK red
@@ -160,7 +163,7 @@ flowchart TD
 ## From an edit to the live page
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"primaryColor":"#0C52A3","primaryTextColor":"#FFFFFF","primaryBorderColor":"#0B1317","lineColor":"#F03C24","secondaryColor":"#F7F9FA","tertiaryColor":"#E9EEF2","edgeLabelBackground":"#F7F9FA","clusterBkg":"#F7F9FA","clusterBorder":"#0C52A3","titleColor":"#0B1317","fontFamily":"Arial, sans-serif"}}}%%
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#0C52A3","primaryTextColor":"#0B1317","primaryBorderColor":"#0B1317","lineColor":"#F03C24","secondaryColor":"#F7F9FA","tertiaryColor":"#E9EEF2","edgeLabelBackground":"#F7F9FA","clusterBkg":"#F7F9FA","clusterBorder":"#0C52A3","titleColor":"#0B1317","fontFamily":"Arial, sans-serif"}}}%%
 flowchart LR
     E["Edit a file in src/"] --> B["npm run build"]
     B --> A["Astro builds<br/>static HTML, CSS and scripts"]
@@ -168,6 +171,7 @@ flowchart LR
     Z --> D[("dist/")]
     D --> L(["Live at once.<br/>The server reads dist/ on each request."])
 
+    classDef default fill:#0C52A3,stroke:#0B1317,color:#FFFFFF
     classDef red fill:#F03C24,stroke:#0B1317,color:#FFFFFF
     classDef paper fill:#FFFFFF,stroke:#0C52A3,color:#0B1317
     class L red
