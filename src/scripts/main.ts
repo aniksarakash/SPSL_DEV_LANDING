@@ -7,9 +7,11 @@
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 // 0. The logo film. It loads after the page, so it never delays the first
-// paint. It loops while the logo is on screen. With reduced motion it plays
-// one time and then rests on the still logo. The button over the logo pauses
-// and plays it. A visitor who asked the browser to save data gets the still logo.
+// paint. It loops while the logo is on screen, also when the device asks for
+// reduced motion: the owner chose that, because the film is small and is the
+// brand mark. The button over the logo pauses and plays it, which is how a
+// visitor stops the motion. A visitor who asked the browser to save data gets
+// the still logo.
 const logo = document.querySelector<HTMLElement>('[data-logo]');
 const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
 if (logo && !saveData) {
@@ -22,7 +24,7 @@ if (logo && !saveData) {
     toggle.setAttribute('aria-pressed', String(!wanted));
     if (!wanted) logo.classList.remove('is-playing');
     if (wanted && onScreen && !document.hidden) {
-      film.loop = !reduced.matches;
+      film.loop = true;
       film.play().catch(() => {
         // The browser refused to play. The still logo stays.
         wanted = false;
@@ -35,12 +37,6 @@ if (logo && !saveData) {
 
   // The film covers the still logo only when it has frames to show.
   film.addEventListener('playing', () => logo.classList.toggle('is-playing', wanted));
-  // "ended" comes only when the film does not loop: rest on the still logo.
-  film.addEventListener('ended', () => {
-    wanted = false;
-    film.currentTime = 0;
-    sync();
-  });
   toggle.addEventListener('click', () => {
     wanted = !wanted;
     sync();
