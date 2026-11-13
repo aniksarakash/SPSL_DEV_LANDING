@@ -1,0 +1,25 @@
+{
+  "name": "spsl-landing",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Five jobs in proof: the landing page for software in development at Smart Printing Solutions Ltd.",
+  "author": "Anik Sarker Akash",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node scripts/astro.mjs dev",
+    "build": "node scripts/astro.mjs build && node scripts/precompress.mjs",
+    "serve": "node server/serve.mjs",
+    "preview": "npm run build && npm run serve"
+  },
+  "dependencies": {
+    "@fontsource-variable/archivo": "5.3.0",
+    "@fontsource/instrument-serif": "5.3.0",
+    "astro": "7.4.11"
+  },
+  "devDependencies": {
+    "node-win-x64": "22.23.5"
+  }
+}

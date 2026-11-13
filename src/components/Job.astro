@@ -1,0 +1,66 @@
+---
+// One job on the sheet: title, what it does, status stamp, then the working
+// model ("moment") beside the notes. The text comes from src/data/jobs.ts.
+import Reg from './Reg.astro';
+import RegMark from './RegMark.astro';
+import { jobs } from '../data/jobs';
+
+interface Props {
+  id: string;
+  statusNote?: string;
+}
+const { id, statusNote } = Astro.props;
+const index = jobs.findIndex((j) => j.id === id);
+const job = jobs[index];
+const flip = index % 2 === 1;
+---
+
+<div class="trimwrap sheet" aria-hidden="true">
+  <div class="trim"></div>
+  <RegMark size={36} class="trimwrap__mark" />
+</div>
+
+<section class:list={['job', 'sheet', flip && 'job--flip']} id={id} aria-labelledby={`${id}-title`} data-job>
+  <div class="job__head">
+    <p class="job__slug small">Job {index + 1} of {jobs.length} <span aria-hidden="true">/</span> {job.name}</p>
+    <Reg as="h2" id={`${id}-title`} text={job.short} class="job__title" />
+    <div class="job__lede">
+      <p class="job__what">{job.line}</p>
+      <div class="job__status">
+        <p class="stamp"><span class="vh">Status: </span>{job.status}</p>
+        {statusNote && <p class="small job__statusnote">{statusNote}</p>}
+      </div>
+    </div>
+  </div>
+  <div class="job__body">
+    <div class="job__moment">
+      <slot name="moment" />
+    </div>
+    <div class="job__notes">
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  .trimwrap {
+    position: relative;
+  }
+  .trimwrap :global(.trimwrap__mark) {
+    position: absolute;
+    right: calc(var(--gutter) + var(--bar));
+    top: 50%;
+    translate: 0 -50%;
+    background: var(--paper);
+    padding-left: 0.5rem;
+    box-sizing: content-box;
+  }
+  .job__slug {
+    color: var(--blue);
+    font-weight: 650;
+    letter-spacing: 0.02em;
+  }
+  .job__statusnote {
+    max-width: 44ch;
+  }
+</style>

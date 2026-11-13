@@ -1,0 +1,27 @@
+---
+import Sheet from '../layouts/Sheet.astro';
+import Furniture from '../components/Furniture.astro';
+import Hero from '../components/Hero.astro';
+import Footer from '../components/Footer.astro';
+import Stock from '../components/jobs/Stock.astro';
+import Cheques from '../components/jobs/Cheques.astro';
+import Conveyance from '../components/jobs/Conveyance.astro';
+import Ticketing from '../components/jobs/Ticketing.astro';
+import Packages from '../components/jobs/Packages.astro';
+---
+
+<Sheet
+  title="Five jobs in proof. Software in development at Smart Printing Solutions Ltd."
+  description="A proof sheet of five pieces of software that Smart Printing Solutions Ltd. has in development: what each one does, and where it stands today."
+>
+  <Furniture />
+  <Hero />
+  <main id="main">
+    <Stock />
+    <Cheques />
+    <Conveyance />
+    <Ticketing />
+    <Packages />
+  </main>
+  <Footer />
+</Sheet>

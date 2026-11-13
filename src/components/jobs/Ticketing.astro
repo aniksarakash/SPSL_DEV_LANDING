@@ -1,0 +1,271 @@
+---
+// Job 4. The working model is dispatch: a complaint goes to the closest
+// engineer who is clocked in, and the service call runs to its close.
+import Job from '../Job.astro';
+
+// Positions are percentages of the map. All people and places are made up.
+const engineers = [
+  { x: 12, y: 14, on: true },
+  { x: 50, y: 34, on: false },
+  { x: 88, y: 14, on: true },
+  { x: 30, y: 84, on: true },
+  { x: 88, y: 66, on: false },
+];
+const sites = [
+  { x: 30, y: 42, name: 'A' },
+  { x: 70, y: 52, name: 'B' },
+  { x: 12, y: 62, name: 'C' },
+  { x: 60, y: 88, name: 'D' },
+];
+const steps = ['Logged', 'Assigned', 'Accepted', 'En route', 'In progress', 'Close requested', 'Closed'];
+---
+
+<Job
+  id="ticketing"
+  statusNote="The platform is in production. This job is the redesign of its interface. Some items from the interface audit are still open."
+>
+  <div slot="moment" class="moment tkt" data-demo="ticketing">
+    <div class="moment__caption small">
+      <strong>Working model: dispatch</strong>
+      <span>Made-up map and people</span>
+    </div>
+
+    <div class="tkt__map" data-map>
+      <svg class="tkt__ground" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <path class="tkt__river" d="M-2 70C18 60 30 78 48 70S78 40 102 46V58C80 54 66 78 48 82S16 72 -2 82Z"></path>
+        <path class="tkt__road" d="M0 26H100M0 54H100M22 0V100M64 0V100M0 96 100 4"></path>
+      </svg>
+      <i class="tkt__route" aria-hidden="true" data-route></i>
+
+      {
+        engineers.map((e, i) => (
+          <button
+            class="tkt__eng"
+            type="button"
+            style={`left:${e.x}%;top:${e.y}%`}
+            data-eng={i}
+            data-x={e.x}
+            data-y={e.y}
+            aria-pressed={e.on ? 'true' : 'false'}
+          >
+            <i aria-hidden="true" />
+            <span aria-hidden="true">E{i + 1}</span>
+            <span class="vh" data-label>
+              Engineer {i + 1}, {e.on ? 'clocked in. Press to clock out.' : 'off duty. Press to clock in.'}
+            </span>
+          </button>
+        ))
+      }
+      {
+        sites.map((s) => (
+          <button class="tkt__site" type="button" style={`left:${s.x}%;top:${s.y}%`} data-site={s.name} data-x={s.x} data-y={s.y}>
+            <i aria-hidden="true" />
+            <span aria-hidden="true">{s.name}</span>
+            <span class="vh">Customer {s.name}. Press to log a complaint.</span>
+          </button>
+        ))
+      }
+    </div>
+
+    <ul class="tkt__key small" aria-label="Map key">
+      <li><i class="tkt__k tkt__k--on"></i>Engineer, clocked in</li>
+      <li><i class="tkt__k tkt__k--off"></i>Engineer, off duty</li>
+      <li><i class="tkt__k tkt__k--site"></i>Customer</li>
+    </ul>
+
+    <p class="moment__say" role="status" data-say>
+      Press a customer to log a complaint. Press an engineer to clock that engineer in or out.
+    </p>
+
+    <h3 id="tkt-steps">One service call</h3>
+    <ol class="steps small" aria-labelledby="tkt-steps" data-steps>
+      {steps.map((s) => <li>{s}</li>)}
+    </ol>
+  </div>
+
+  <p class="remark">From a customer's complaint to a signed-off job.</p>
+  <ul class="facts">
+    <li>In production: about 120 field engineers, about 500 customers and more than 120,000 service calls.</li>
+    <li>The ticket desk logs the complaint. Dispatch offers the closest engineers who are clocked in. The engineer works the job from a phone.</li>
+    <li>Management sees live status, attendance, service levels and cost in one place.</li>
+    <li>Also in the platform: a TV wall mode for the support room, a live map, maintenance contracts, attendance and leave, parts, and reports.</li>
+    <li>Light and dark themes. English and Bangla.</li>
+    <li>The redesign is checked screen by screen, at phone and desktop widths and in both themes: text contrast, touch target size, labels, and keyboard focus.</li>
+  </ul>
+  <p class="stack small"><b>Made with</b> PHP 8.0, MariaDB, plain JavaScript and Leaflet.</p>
+</Job>
+
+<style is:global>
+  .tkt__map {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border: 1px solid var(--rule-strong);
+    border-radius: 0.5rem;
+    background: var(--paper);
+    overflow: hidden;
+    touch-action: manipulation;
+  }
+
+  @media (min-width: 36rem) {
+    .tkt__map {
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  .tkt__ground {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .tkt__river {
+    fill: rgb(12 82 163 / 0.13);
+  }
+
+  .tkt__road {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 7;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* The route from the engineer to the customer. The script sets its start,
+     length and angle. It draws by scaling along its own length. */
+  .tkt__route {
+    position: absolute;
+    height: 3px;
+    margin-top: -1.5px;
+    border-radius: 2px;
+    background: var(--red);
+    transform-origin: left center;
+    transform: rotate(var(--angle, 0rad)) scaleX(0);
+    pointer-events: none;
+  }
+
+  .tkt__route.is-drawn {
+    transform: rotate(var(--angle, 0rad)) scaleX(1);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .tkt__route.is-drawn {
+      transition: transform 380ms var(--ease-out);
+    }
+  }
+
+  /* Each person and place is a 48 px target with a smaller mark inside. */
+  .tkt__eng,
+  .tkt__site {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin: -1.5rem 0 0 -1.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tkt__eng i,
+  .tkt__site i {
+    grid-area: 1 / 1;
+    width: 1.15rem;
+    height: 1.15rem;
+    border: 2.5px solid var(--blue);
+    background: var(--blue);
+    transition:
+      transform var(--fast) var(--ease-out),
+      box-shadow var(--fast) var(--ease-out);
+  }
+
+  .tkt__eng i {
+    border-radius: 50%;
+  }
+
+  .tkt__eng[aria-pressed='false'] i {
+    background: #fff;
+    border-style: dashed;
+  }
+
+  .tkt__site i {
+    width: 1rem;
+    height: 1rem;
+    border-color: var(--over);
+    background: var(--over);
+  }
+
+  .tkt__site.is-open i {
+    border-color: var(--red);
+    background: var(--red);
+  }
+
+  .tkt__eng span[aria-hidden],
+  .tkt__site span[aria-hidden] {
+    grid-area: 1 / 1;
+    translate: 0 1.15rem;
+    font-size: 0.75rem;
+    font-weight: 750;
+    line-height: 1;
+    color: var(--over);
+    pointer-events: none;
+  }
+
+  .tkt__eng:hover i,
+  .tkt__site:hover i,
+  .tkt__eng:focus-visible i,
+  .tkt__site:focus-visible i {
+    transform: translate3d(-2px, -2px, 0);
+    box-shadow: 3px 3px 0 var(--red);
+  }
+
+  .tkt__eng:active i,
+  .tkt__site:active i {
+    transform: scale(0.86);
+    box-shadow: none;
+  }
+
+  .tkt__eng.is-busy i {
+    box-shadow: 0 0 0 4px rgb(240 60 36 / 0.35);
+  }
+
+  .tkt__key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1.2rem;
+    margin-top: 0.7rem;
+    color: var(--over);
+  }
+
+  .tkt__key li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .tkt__k {
+    width: 0.8rem;
+    height: 0.8rem;
+    border: 2px solid var(--blue);
+    border-radius: 50%;
+    background: var(--blue);
+  }
+
+  .tkt__k--off {
+    background: #fff;
+    border-style: dashed;
+  }
+
+  .tkt__k--site {
+    border-radius: 0;
+    border-color: var(--over);
+    background: var(--over);
+  }
+
+  .tkt h3 {
+    margin: 0.4rem 0 0.5rem;
+  }
+</style>

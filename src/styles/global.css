@@ -1,0 +1,709 @@
+/* ==========================================================================
+   SPSL proof sheet. A two-colour print job: brand blue and brand red on white
+   stock. The darkest colour on the page is the overprint of the two inks.
+   ========================================================================== */
+
+:root {
+  /* Inks and stock */
+  --paper: #f7f9fa;
+  --paper-shade: #e9eef2;
+  --blue: #0c52a3;
+  --red: #f03c24;
+  /* Red with a light screen of blue under it: dark enough for small text (5.3:1 on paper). */
+  --red-text: #c22e18;
+  /* Blue x red, multiplied: what the press gives where both plates print solid. */
+  --over: #0b1317;
+  --rule: rgb(12 82 163 / 0.28);
+  --rule-strong: rgb(12 82 163 / 0.55);
+
+  /* Type */
+  --sans: Archivo, 'Archivo Fallback', Arial, sans-serif;
+  --serif: 'Instrument Serif', 'Instrument Serif Fallback', Georgia, serif;
+  --mono: ui-monospace, 'Cascadia Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+
+  --step--1: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.5rem);
+  --step-2: clamp(1.5rem, 1.25rem + 1.2vw, 2.25rem);
+  --step-title: clamp(3.4rem, 1.2rem + 11.5vw, 11rem);
+  --step-hero: clamp(4.4rem, 0.5rem + 20vw, 17.5rem);
+
+  /* Space */
+  --gutter: clamp(1rem, 0.4rem + 3.2vw, 4.5rem);
+  --bar: 0px; /* width kept free for the colour bar on wide screens */
+
+  /* Motion: short, physical. The spring settles once, like a sheet landing. */
+  --fast: 90ms;
+  --move: 320ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --land: linear(0, 0.36 9%, 0.74 20%, 1.02 33%, 1.1 42%, 1.06 52%, 0.99 66%, 1 82%, 1);
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --bar: 4.5rem;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: 1.5rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--over);
+  font-family: var(--sans);
+  font-size: var(--step-0);
+  font-stretch: 100%;
+  line-height: 1.5;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: var(--blue);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+svg {
+  display: block;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+:focus-visible {
+  outline: 3px solid var(--over);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--blue);
+  color: var(--paper);
+}
+
+.vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip {
+  position: absolute;
+  left: var(--gutter);
+  top: 0.5rem;
+  z-index: 50;
+  padding: 0.85rem 1.1rem;
+  background: var(--over);
+  color: var(--paper);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip:focus-visible {
+  transform: none;
+  outline-color: var(--red);
+}
+
+/* --------------------------------------------------------------------------
+   Sheet
+   -------------------------------------------------------------------------- */
+
+.sheet {
+  padding-inline: var(--gutter);
+  padding-right: calc(var(--gutter) + var(--bar));
+  max-width: 120rem;
+  margin-inline: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Register: a heading printed from two plates. The blue plate is in the flow.
+   The red plate sits on top and multiplies, so where both print the result is
+   the overprint colour. Out of register, each ink shows at the edges.
+   -------------------------------------------------------------------------- */
+
+.reg {
+  position: relative;
+  display: block;
+  isolation: isolate;
+  color: var(--blue);
+}
+
+.reg__red {
+  position: absolute;
+  inset: 0;
+  color: var(--red);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  user-select: none;
+  transform: translate3d(var(--rx, 0px), var(--ry, 0px), 0);
+}
+
+@keyframes into-register {
+  from {
+    transform: translate3d(0.085em, -0.055em, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reg--scroll .reg__red {
+      animation: into-register linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 42%;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Display type
+   -------------------------------------------------------------------------- */
+
+.display {
+  font-stretch: 62%;
+  font-weight: 850;
+  line-height: 0.84;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+.remark {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: var(--step-2);
+  line-height: 1.12;
+  color: var(--blue);
+  text-wrap: balance;
+}
+
+.small {
+  font-size: var(--step--1);
+  font-stretch: 88%;
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons. Hover shows the red plate out of register behind the blue one.
+   Press pushes the two into register.
+   -------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  min-height: 3rem;
+  min-width: 3rem;
+  padding: 0.7rem 1.15rem;
+  border: 2px solid var(--blue);
+  border-radius: 0.5rem;
+  background: var(--blue);
+  color: var(--paper);
+  font-weight: 650;
+  font-stretch: 92%;
+  line-height: 1.15;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 0 0 var(--red);
+  transition:
+    transform var(--fast) var(--ease-out),
+    box-shadow var(--fast) var(--ease-out),
+    background-color var(--fast) linear;
+}
+
+.btn:hover {
+  transform: translate3d(-2px, -2px, 0);
+  box-shadow: 4px 4px 0 var(--red);
+}
+
+.btn:active {
+  transform: translate3d(1px, 1px, 0);
+  box-shadow: 0 0 0 var(--red);
+  background: var(--over);
+  border-color: var(--over);
+  transition-duration: 0ms;
+}
+
+.btn[disabled],
+.btn[aria-disabled='true'] {
+  background: transparent;
+  color: var(--blue);
+  border-style: dashed;
+  box-shadow: none;
+  transform: none;
+  cursor: default;
+}
+
+.btn--quiet {
+  background: transparent;
+  color: var(--blue);
+}
+
+.btn--quiet:active {
+  color: var(--paper);
+}
+
+/* --------------------------------------------------------------------------
+   Stamp: status, as an office rubber stamp.
+   -------------------------------------------------------------------------- */
+
+.stamp {
+  display: inline-block;
+  padding: 0.5rem 0.85rem 0.45rem;
+  border: 2.5px solid var(--red-text);
+  border-radius: 0.4rem;
+  color: var(--red-text);
+  font-weight: 750;
+  font-stretch: 78%;
+  font-size: var(--step-1);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  transform: rotate(-2.2deg);
+  transform-origin: left center;
+}
+
+/* --------------------------------------------------------------------------
+   Halftone tints
+   -------------------------------------------------------------------------- */
+
+.tint {
+  background-image: radial-gradient(circle at center, var(--tint-ink, var(--blue)) 0 var(--dot, 30%), transparent calc(var(--dot, 30%) + 6%));
+  background-size: var(--screen, 6px) var(--screen, 6px);
+}
+
+/* --------------------------------------------------------------------------
+   Job sections
+   -------------------------------------------------------------------------- */
+
+.job {
+  position: relative;
+  padding-block: clamp(3.5rem, 2rem + 7vw, 8rem) clamp(3rem, 2rem + 5vw, 6.5rem);
+  /* A job that is far from the screen is not laid out. The browser keeps the
+     real height once it has seen the job, and uses the estimate before that. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 2400px;
+}
+
+@media (min-width: 56rem) {
+  .job {
+    contain-intrinsic-size: auto 1350px;
+  }
+}
+
+.job__head {
+  display: grid;
+  gap: clamp(1rem, 0.6rem + 1.6vw, 2rem);
+}
+
+.job__title {
+  font-size: var(--step-title);
+}
+
+.job__lede {
+  display: grid;
+  gap: 1.25rem 3rem;
+  align-items: start;
+}
+
+.job__what {
+  font-size: var(--step-2);
+  font-stretch: 92%;
+  font-weight: 500;
+  line-height: 1.18;
+  max-width: 24ch;
+  text-wrap: balance;
+}
+
+.job__status {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+  max-width: 34rem;
+}
+
+.job__body {
+  display: grid;
+  gap: clamp(2rem, 1rem + 4vw, 4.5rem);
+  margin-top: clamp(2rem, 1rem + 4vw, 4.5rem);
+}
+
+.job__notes {
+  display: grid;
+  gap: 1.75rem;
+  align-content: start;
+  max-width: 40rem;
+}
+
+.job__notes p {
+  max-width: 62ch;
+}
+
+.facts {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.facts li {
+  position: relative;
+  padding-left: 1.6rem;
+  max-width: 60ch;
+}
+
+/* A small register cross as the list mark. */
+.facts li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.42em;
+  width: 0.7rem;
+  height: 0.7rem;
+  background:
+    linear-gradient(var(--blue), var(--blue)) center / 100% 1.5px no-repeat,
+    linear-gradient(var(--blue), var(--blue)) center / 1.5px 100% no-repeat;
+}
+
+.stack {
+  border-top: 1px solid var(--rule);
+  padding-top: 0.9rem;
+  color: var(--blue);
+}
+
+.stack b {
+  font-weight: 650;
+}
+
+@media (min-width: 56rem) {
+  .job__lede {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+
+  .job__body {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .job--flip .job__body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr);
+  }
+
+  .job--flip .job__moment {
+    order: 2;
+  }
+}
+
+/* The moment: the working model of the product. */
+.moment {
+  position: relative;
+  /* A change inside a working model does not make the rest of the page lay out again. */
+  contain: layout;
+  border: 1.5px solid var(--blue);
+  border-radius: 0.75rem;
+  background: #fff;
+  padding: clamp(1rem, 0.6rem + 1.6vw, 1.75rem);
+}
+
+.moment__caption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1rem;
+  color: var(--blue);
+}
+
+.moment__caption strong {
+  font-weight: 700;
+  font-stretch: 88%;
+}
+
+.moment__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1.1rem;
+}
+
+.moment__say {
+  margin-top: 0.9rem;
+  min-height: 3em;
+  color: var(--over);
+}
+
+/* Trim line between jobs: where the sheet would be cut. */
+.trim {
+  position: relative;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--rule-strong) 0 10px, transparent 10px 18px);
+}
+
+/* --------------------------------------------------------------------------
+   Parts that more than one working model uses
+   -------------------------------------------------------------------------- */
+
+.moment h3 {
+  font-size: var(--step--1);
+  font-stretch: 88%;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--blue);
+}
+
+.moment__say strong {
+  font-weight: 700;
+}
+
+.moment__say .bad {
+  color: var(--red-text);
+  font-weight: 700;
+}
+
+/* One choice from a short list, as a row of keys. */
+.seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.seg legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0;
+  font-size: var(--step--1);
+  font-stretch: 88%;
+  font-weight: 650;
+  color: var(--blue);
+}
+
+.seg label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0.55rem 0.95rem;
+  border: 1.5px solid var(--blue);
+  border-radius: 0.5rem;
+  background: #fff;
+  color: var(--blue);
+  font-weight: 600;
+  font-stretch: 92%;
+  line-height: 1.15;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--fast) var(--ease-out),
+    box-shadow var(--fast) var(--ease-out),
+    background-color var(--fast) linear;
+}
+
+.seg input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.seg label:hover {
+  transform: translate3d(-1px, -1px, 0);
+  box-shadow: 3px 3px 0 var(--red);
+}
+
+.seg label:active {
+  transform: translate3d(1px, 1px, 0);
+  box-shadow: none;
+}
+
+.seg label:has(input:checked) {
+  background: var(--blue);
+  color: var(--paper);
+}
+
+/* The chosen key also carries a mark, so the choice does not rest on colour. */
+.seg label:has(input:checked)::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  background: var(--paper);
+}
+
+.seg label:has(input:focus-visible) {
+  outline: 3px solid var(--over);
+  outline-offset: 3px;
+}
+
+/* The steps of a process. "now" is filled, "done" carries a tick. */
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.steps li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--blue);
+  font-weight: 600;
+  transition:
+    background-color var(--fast) linear,
+    color var(--fast) linear;
+}
+
+.steps li[data-s='done'] {
+  border-color: var(--blue);
+}
+
+.steps li[data-s='done']::before {
+  content: '';
+  width: 0.4rem;
+  height: 0.7rem;
+  margin: -0.15rem 0.1rem 0 0.1rem;
+  border: solid var(--blue);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.steps li[data-s='now'] {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: var(--paper);
+}
+
+/* A label and a checkbox as one 48 px target. */
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 3rem;
+  padding: 0.3rem 0.2rem;
+  color: var(--blue);
+  font-weight: 600;
+  font-stretch: 92%;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.check input {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+
+/* A stamp that lands. The model adds .is-landing when the stamp appears. */
+@keyframes stamp-land {
+  from {
+    opacity: 0;
+    transform: rotate(-9deg) scale(1.7);
+  }
+  35% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-2.2deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stamp.is-landing {
+    animation: stamp-land 420ms var(--land) both;
+  }
+}
+
+/* Something that has just arrived: a cartridge, a sheet, a row in a log. */
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -0.6rem, 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .is-new {
+    animation: arrive 260ms var(--ease-out) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-new {
+    animation: none;
+  }
+}

@@ -1,0 +1,17 @@
+---
+// A heading printed from two plates (blue, then red on top).
+// Screen readers get the text once: the red plate is hidden from them.
+interface Props {
+  as?: 'h1' | 'h2' | 'p' | 'span';
+  text: string;
+  id?: string;
+  class?: string;
+  scroll?: boolean;
+}
+// 'rest' carries the style scope of the parent, so a parent can size this heading.
+const { as: Tag = 'h2', text, id, class: cls = '', scroll = true, ...rest } = Astro.props;
+---
+
+<Tag id={id} class:list={['reg', 'display', scroll && 'reg--scroll', cls]} {...rest}>
+  <span class="reg__blue">{text}</span><span class="reg__red" aria-hidden="true">{text}</span>
+</Tag>

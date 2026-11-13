@@ -1,0 +1,229 @@
+---
+// Job 5. The working model is a carton net: the driver and its settings are
+// printed flat, then the sheet folds into one signed package.
+import Job from '../Job.astro';
+
+const steps = ['Analyse', 'Configure', 'Build', 'Sign', 'Verify'];
+---
+
+<Job id="packages" statusNote="293 passing tests.">
+  <div slot="moment" class="moment pkg" data-demo="packages" data-fold="1" data-sealed>
+    <div class="moment__caption small">
+      <strong>Working model: a driver folds into a package</strong>
+      <span>Made-up file names</span>
+    </div>
+
+    <div class="pkg__stage" aria-hidden="true">
+      <div class="pkg__net">
+        <div class="pkg__p pkg__p--base"><span>Driver</span></div>
+        <div class="pkg__p pkg__p--n">
+          <span>Queue</span>
+          <div class="pkg__p pkg__p--lid"><span data-lid>MSI</span></div>
+        </div>
+        <div class="pkg__p pkg__p--e"><span>Settings</span></div>
+        <div class="pkg__p pkg__p--s"><span>Defaults</span></div>
+        <div class="pkg__p pkg__p--w"><span>Connection</span></div>
+      </div>
+      <p class="stamp pkg__seal">Signed</p>
+    </div>
+
+    <ol class="steps small" aria-label="Build steps" data-steps>
+      {steps.map((s) => <li data-s="done">{s}</li>)}
+    </ol>
+
+    <div class="moment__controls">
+      <fieldset class="seg">
+        <legend>Package format</legend>
+        <label><input type="radio" name="pkg-format" value="msi" checked />MSI</label>
+        <label><input type="radio" name="pkg-format" value="exe" />EXE</label>
+        <label><input type="radio" name="pkg-format" value="pkg" />macOS PKG</label>
+      </fieldset>
+      <button class="btn" type="button" data-build>Build the package</button>
+    </div>
+
+    <p class="moment__say" role="status" data-say>
+      <strong>office-printer.msi</strong> is signed and verified. It installs with no questions. It is ready for Intune, GPO or
+      SCCM.
+    </p>
+  </div>
+
+  <p class="remark">One line in a deployment tool. Not a morning of Add Printer on every desk.</p>
+  <ul class="facts">
+    <li>A vendor driver goes in as a .zip, .exe, .cab, .inf or .dmg file. Any driver brand.</li>
+    <li>Three package formats come out: MSI, EXE, and a macOS PKG that is built on Windows.</li>
+    <li>The connection, the queue, the defaults and the driver settings are preset inside the package.</li>
+    <li>On a locked-down PC the installer falls back from PowerShell to CMD.</li>
+    <li>The package is signed and verified from end to end.</li>
+    <li>It runs in a browser and has zero dependencies.</li>
+  </ul>
+</Job>
+
+<style is:global>
+  .pkg__stage {
+    --s: clamp(3.4rem, 2.2rem + 5.4vw, 6.25rem);
+    position: relative;
+    height: calc(var(--s) * 3.3);
+    border-radius: 0.5rem;
+    background-color: var(--paper-shade);
+    overflow: hidden;
+  }
+
+  /* The base panel of the net, seen from above and to one side. */
+  .pkg__net {
+    --f: 0;
+    position: absolute;
+    left: calc(50% - var(--s) * 0.2);
+    top: calc(var(--s) * 1.75);
+    width: var(--s);
+    height: var(--s);
+    transform: rotateX(60deg) rotateZ(-45deg);
+    transform-style: preserve-3d;
+  }
+
+  [data-fold='1'] .pkg__net {
+    --f: 1;
+  }
+
+  .pkg__p {
+    position: absolute;
+    width: var(--s);
+    height: var(--s);
+    display: grid;
+    place-items: center;
+    border: 1.5px solid var(--blue);
+    background: #fff;
+    color: var(--blue);
+    font-size: clamp(0.62rem, 0.5rem + 0.5vw, 0.85rem);
+    font-stretch: 75%;
+    font-weight: 750;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    transform-style: preserve-3d;
+    transition: transform 560ms var(--ease-out);
+  }
+
+  .pkg__p--base {
+    inset: 0;
+    background-image: radial-gradient(circle at center, rgb(12 82 163 / 0.28) 0 22%, transparent 28%);
+    background-size: 6px 6px;
+  }
+
+  .pkg__p--base span {
+    padding: 0.1rem 0.3rem;
+    background: #fff;
+  }
+
+  .pkg__p--s {
+    top: 100%;
+    left: 0;
+    transform-origin: top;
+    transform: rotateX(calc(var(--f) * 90deg));
+  }
+
+  .pkg__p--e {
+    left: 100%;
+    top: 0;
+    transform-origin: left;
+    transform: rotateY(calc(var(--f) * -90deg));
+    transition-delay: 70ms;
+  }
+
+  .pkg__p--w {
+    right: 100%;
+    top: 0;
+    transform-origin: right;
+    transform: rotateY(calc(var(--f) * 90deg));
+    transition-delay: 140ms;
+  }
+
+  .pkg__p--n {
+    bottom: 100%;
+    left: 0;
+    transform-origin: bottom;
+    transform: rotateX(calc(var(--f) * -90deg));
+    transition-delay: 210ms;
+  }
+
+  .pkg__p--lid {
+    bottom: 100%;
+    left: -1.5px;
+    transform-origin: bottom;
+    transform: rotateX(calc(var(--f) * -90deg));
+    transition-delay: 380ms;
+    background: var(--blue);
+    color: #fff;
+  }
+
+  [data-fold='0'] .pkg__p {
+    transition-delay: 0ms;
+  }
+
+  /* Folded, the side panels are seen from the outside. Their labels are on the
+     inside, so the labels fade and a halftone shade takes their place. */
+  .pkg__p > span {
+    transition: opacity 200ms linear;
+  }
+
+  [data-fold='1'] .pkg__p:not(.pkg__p--lid) > span {
+    opacity: 0;
+  }
+
+  .pkg__p--s::after,
+  .pkg__p--w::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at center, var(--blue) 0 var(--dot), transparent calc(var(--dot) + 6%));
+    background-size: 5px 5px;
+    opacity: 0;
+    transition: opacity 300ms linear 250ms;
+  }
+
+  .pkg__p--s::after {
+    --dot: 18%;
+  }
+
+  .pkg__p--w::after {
+    --dot: 34%;
+  }
+
+  [data-fold='1'] .pkg__p--s::after,
+  [data-fold='1'] .pkg__p--w::after {
+    opacity: 1;
+  }
+
+  [data-fold='0'] .pkg__p--s::after,
+  [data-fold='0'] .pkg__p--w::after {
+    transition-delay: 0ms;
+    transition-duration: 120ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pkg__p {
+      transition-duration: 1ms;
+      transition-delay: 0ms;
+    }
+  }
+
+  .pkg__seal {
+    position: absolute;
+    left: calc(50% + var(--s) * 0.35);
+    top: calc(var(--s) * 0.5);
+    margin: 0;
+    background: rgb(255 255 255 / 0.86);
+    opacity: 0;
+  }
+
+  [data-sealed] .pkg__seal {
+    opacity: 1;
+  }
+
+  .pkg .steps {
+    margin-top: 1rem;
+  }
+
+  .pkg .moment__controls {
+    align-items: flex-end;
+    gap: 1rem;
+  }
+</style>

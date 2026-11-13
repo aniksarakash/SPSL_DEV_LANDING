@@ -1,0 +1,185 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/spsl-logo.webp';
+import Reg from './Reg.astro';
+import RegMark from './RegMark.astro';
+import { jobs, PROOF_DATE, PROOF_DATE_ISO } from '../data/jobs';
+---
+
+<header class="hero sheet">
+  <div class="slug small">
+    <Image
+      class="slug__logo"
+      src={logo}
+      alt="Smart Printing Solutions Ltd."
+      widths={[160, 320]}
+      sizes="160px"
+      loading="eager"
+      fetchpriority="high"
+    />
+    <p class="slug__note">
+      Proof sheet. Two colours on white stock. Proofed <time datetime={PROOF_DATE_ISO}>{PROOF_DATE}</time>.
+    </p>
+  </div>
+
+  <Reg as="h1" text="Five jobs in proof." class="hero__title" scroll={false} />
+
+  <div class="hero__row">
+    <p class="hero__intro">
+      A proof is the print you check before the full run. This sheet is a proof of five pieces of software that Smart
+      Printing Solutions Ltd. has in development. It shows what each one does, and where it stands today.
+    </p>
+    <RegMark size={64} class="hero__mark" />
+  </div>
+
+  <nav class="index" aria-label="The five jobs">
+    <ul>
+      {
+        jobs.map((job) => (
+          <li>
+            <a href={`#${job.id}`}>
+              <span class="index__name">{job.name}</span>
+              <span class="index__line">{job.line}</span>
+              <span class="index__status">{job.status}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .hero {
+    padding-top: clamp(1.25rem, 0.8rem + 1.6vw, 2.25rem);
+    padding-bottom: clamp(2rem, 1rem + 4vw, 4rem);
+  }
+
+  .slug {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 2rem;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--blue);
+  }
+
+  .slug__logo {
+    width: clamp(7rem, 5.5rem + 5vw, 10rem);
+    /* The logo file has a white field. Multiply prints it straight onto the stock. */
+    mix-blend-mode: multiply;
+  }
+
+  .slug__note {
+    max-width: 28rem;
+  }
+
+  .hero__title {
+    margin-top: clamp(1.75rem, 0.5rem + 5vw, 4.5rem);
+    font-size: var(--step-hero);
+    /* A proof is allowed to sit a hair out of register. */
+    --rx: 0.02em;
+    --ry: -0.013em;
+  }
+
+  .hero__title :global(.reg__red) {
+    transition: transform 220ms var(--ease-out);
+  }
+
+  @keyframes hero-register {
+    from {
+      transform: translate3d(0.16em, -0.1em, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__title :global(.reg__red) {
+      animation: hero-register 1200ms var(--land) 250ms backwards;
+    }
+  }
+
+  .hero__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.5rem clamp(1.5rem, 4vw, 5rem);
+    align-items: end;
+    margin-top: clamp(1.5rem, 1rem + 2.4vw, 3rem);
+  }
+
+  .hero__intro {
+    font-size: var(--step-1);
+    line-height: 1.38;
+    max-width: 46ch;
+    text-wrap: pretty;
+  }
+
+  .hero__mark {
+    width: clamp(2.75rem, 2rem + 3vw, 4.5rem);
+    height: auto;
+  }
+
+  .index {
+    margin-top: clamp(2rem, 1rem + 4vw, 4rem);
+    border-top: 1.5px solid var(--blue);
+  }
+
+  .index a {
+    position: relative;
+    display: grid;
+    gap: 0.15rem 2rem;
+    padding: 0.95rem 0.25rem 1rem;
+    min-height: 3rem;
+    border-bottom: 1px solid var(--rule);
+    color: var(--over);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color var(--fast) linear;
+  }
+
+  .index__name {
+    font-size: var(--step-2);
+    font-stretch: 68%;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--blue);
+    transition: transform var(--fast) var(--ease-out), text-shadow var(--fast) var(--ease-out);
+  }
+
+  .index__line {
+    max-width: 56ch;
+  }
+
+  .index__status {
+    color: var(--red-text);
+    font-weight: 650;
+    font-stretch: 88%;
+  }
+
+  .index a:hover,
+  .index a:focus-visible {
+    background: #fff;
+  }
+
+  .index a:hover .index__name,
+  .index a:focus-visible .index__name {
+    transform: translate3d(-2px, -1px, 0);
+    text-shadow: 3px 2px 0 var(--red);
+  }
+
+  .index a:active .index__name {
+    transform: none;
+    text-shadow: none;
+    color: var(--over);
+  }
+
+  @media (min-width: 56rem) {
+    .index a {
+      grid-template-columns: minmax(11rem, 0.9fr) minmax(0, 2fr) minmax(10rem, 0.9fr);
+      align-items: baseline;
+      padding-block: 1.05rem 1.1rem;
+    }
+    .index__status {
+      text-align: right;
+    }
+  }
+</style>

@@ -1,0 +1,48 @@
+---
+// Registration mark: a circle and a cross, one per plate. In register the two
+// marks sit exactly on top of each other.
+interface Props {
+  size?: number;
+  class?: string;
+}
+const { size = 44, class: cls = '', ...rest } = Astro.props;
+---
+
+<svg class:list={['regmark', cls]} width={size} height={size} viewBox="0 0 44 44" aria-hidden="true" focusable="false" {...rest}>
+  <g class="regmark__blue" fill="none" stroke="var(--blue)" stroke-width="1.5">
+    <circle cx="22" cy="22" r="10"></circle>
+    <path d="M22 2v40M2 22h40"></path>
+  </g>
+  <g class="regmark__red" fill="none" stroke="var(--red)" stroke-width="1.5">
+    <circle cx="22" cy="22" r="10"></circle>
+    <path d="M22 2v40M2 22h40"></path>
+  </g>
+</svg>
+
+<style>
+  .regmark {
+    overflow: visible;
+  }
+  .regmark__red {
+    mix-blend-mode: multiply;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  @keyframes mark-in {
+    from {
+      transform: translate3d(5px, -4px, 0) rotate(14deg);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .regmark__red {
+        animation: mark-in linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 45%;
+      }
+    }
+  }
+</style>

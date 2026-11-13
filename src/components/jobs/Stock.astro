@@ -1,0 +1,189 @@
+---
+// Job 1. The working model is a small stock ledger: one toner type, three
+// places, and a log in which each line is sealed to the line before it.
+import Job from '../Job.astro';
+---
+
+<Job id="stock" statusNote="QR label scanning is built and is switched off at launch.">
+  <div slot="moment" class="moment stk" data-demo="stock">
+    <div class="moment__caption small">
+      <strong>Working model: one toner type, three places</strong>
+      <span>Made-up data</span>
+    </div>
+
+    <div class="stk__tiers">
+      <div class="stk__tier">
+        <h3>Central warehouse</h3>
+        <div class="stk__shelf" data-shelf="w" aria-hidden="true">
+          <i class="cart"></i><i class="cart"></i><i class="cart"></i><i class="cart"></i>
+        </div>
+        <p class="small" data-count="w">4 full, 0 empty</p>
+      </div>
+      <div class="stk__tier">
+        <h3>Branch store</h3>
+        <div class="stk__shelf" data-shelf="b" aria-hidden="true"><i class="cart"></i></div>
+        <p class="small" data-count="b">1 full, 0 empty</p>
+      </div>
+      <div class="stk__tier">
+        <h3>Desk printer</h3>
+        <div class="stk__gauge" aria-hidden="true"><i data-gauge></i></div>
+        <p class="small"><span data-level>100</span>% of the toner left</p>
+      </div>
+    </div>
+
+    <div class="moment__controls">
+      <button class="btn" type="button" data-act="print">Print at the desk</button>
+      <button class="btn" type="button" data-act="swap">Swap empty for new</button>
+      <button class="btn" type="button" data-act="send">Send one to the branch</button>
+    </div>
+
+    <p class="moment__say" role="status" data-say>
+      Stock changes only when it moves from one place to another. Each move is one line in the log.
+    </p>
+
+    <div class="stk__log">
+      <div class="stk__loghead">
+        <h3 id="stk-log">Movement log</h3>
+        <button class="btn btn--quiet stk__edit" type="button" data-act="edit" aria-pressed="false">Edit a past line</button>
+      </div>
+      <ol class="stk__ledger small" aria-labelledby="stk-log" data-ledger>
+        <li><span class="stk__n">01</span><span class="stk__t">6 full. Received at Central warehouse</span><span class="stk__h">seal ····</span></li>
+        <li><span class="stk__n">02</span><span class="stk__t">2 full. Central warehouse to Branch store</span><span class="stk__h">seal ····</span></li>
+        <li><span class="stk__n">03</span><span class="stk__t">1 full. Branch store to Desk printer</span><span class="stk__h">seal ····</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <p class="remark">Stock is never edited. It only moves.</p>
+  <ul class="facts">
+    <li>Three tiers: the SPSL central warehouse, the customer's branch stores, and the desks that print.</li>
+    <li>A desk gets a new cartridge only when it returns the empty one.</li>
+    <li>Consumption is checked against the rated yield of the printer. A cartridge that is replaced too early is flagged.</li>
+    <li>Each line of the audit trail is sealed to the line before it, so an edit to history shows.</li>
+    <li>One system for many customers, each with its own branding. Only SPSL sees prices.</li>
+    <li>An installable app made for the phone first: three taps to ask for toner.</li>
+    <li>Reports export to Excel and PDF.</li>
+  </ul>
+  <p class="stack small"><b>Made with</b> Laravel 13, Inertia 3, React 19, TypeScript, Tailwind CSS 4 and MariaDB.</p>
+</Job>
+
+<style is:global>
+  .stk__tiers {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .stk__tier {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 0.6rem;
+    padding: 0.7rem 0.6rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 0.5rem;
+    min-width: 0;
+  }
+
+  .stk__tier .small {
+    color: var(--over);
+  }
+
+  .stk__shelf {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-end;
+    gap: 4px;
+    min-height: 3.6rem;
+  }
+
+  /* One toner cartridge. Solid is full. An outline is an empty that came back. */
+  .cart {
+    width: 0.8rem;
+    height: 1.55rem;
+    border: 1.5px solid var(--blue);
+    border-radius: 2px 2px 3px 3px;
+    background: var(--blue);
+  }
+
+  .cart--empty {
+    background: transparent;
+    border-style: dashed;
+  }
+
+  .stk__gauge {
+    position: relative;
+    align-self: end;
+    width: 1.6rem;
+    height: 3.6rem;
+    border: 1.5px solid var(--blue);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .stk__gauge i {
+    position: absolute;
+    inset: 0;
+    background: var(--blue);
+    transform-origin: bottom;
+    transition: transform var(--move) var(--ease-out);
+  }
+
+  .stk__log {
+    margin-top: 1.1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .stk__loghead {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+  }
+
+  .stk__ledger {
+    display: grid;
+    font-family: var(--mono);
+    font-stretch: 100%;
+    line-height: 1.35;
+  }
+
+  .stk__ledger li {
+    display: grid;
+    grid-template-columns: 1.6rem minmax(0, 1fr) auto;
+    gap: 0.1rem 0.6rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px dotted var(--rule-strong);
+  }
+
+  .stk__n,
+  .stk__h {
+    color: var(--blue);
+  }
+
+  .stk__more {
+    color: var(--blue);
+  }
+
+  .stk__ledger li.is-broken .stk__t,
+  .stk__ledger li.is-broken .stk__h {
+    color: var(--red-text);
+  }
+
+  .stk__ledger li.is-broken .stk__h {
+    text-decoration: line-through;
+  }
+
+  .stk__x {
+    grid-column: 2 / -1;
+    color: var(--red-text);
+    font-weight: 700;
+  }
+
+  .stk__flag {
+    grid-column: 2 / -1;
+    color: var(--red-text);
+  }
+</style>

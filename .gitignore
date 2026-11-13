@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.astro/
+*.log
+# Cloudflare Tunnel secrets must never enter this folder or git.
+cert.pem
+*.cloudflared.json
+.cloudflared/
+# Working copies of source material
+brand-src/
+shots/
+
+# Local tool settings
+.claude/

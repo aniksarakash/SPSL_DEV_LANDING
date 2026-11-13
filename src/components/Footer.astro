@@ -1,0 +1,159 @@
+---
+// The foot of the sheet. A press sheet ends with its colour bar and the
+// printer's imprint: the line that says who made it. The credit is that imprint.
+import { PROOF_DATE, PROOF_DATE_ISO } from '../data/jobs';
+const patches = [
+  { ink: 'var(--blue)', dot: '100%' },
+  { ink: 'var(--blue)', dot: '44%' },
+  { ink: 'var(--blue)', dot: '32%' },
+  { ink: 'var(--blue)', dot: '20%' },
+  { ink: 'var(--over)', dot: '100%' },
+  { ink: 'var(--red)', dot: '20%' },
+  { ink: 'var(--red)', dot: '32%' },
+  { ink: 'var(--red)', dot: '44%' },
+  { ink: 'var(--red)', dot: '100%' },
+];
+---
+
+<footer class="foot sheet">
+  <div class="foot__bar" aria-hidden="true">
+    {
+      patches.map((p) => (
+        <i
+          class:list={[p.dot !== '100%' && 'tint']}
+          style={p.dot === '100%' ? `background:${p.ink}` : `--tint-ink:${p.ink};--dot:${p.dot};--screen:5px`}
+        />
+      ))
+    }
+  </div>
+
+  <div class="foot__grid">
+    <div class="foot__imprint">
+      <p class="credit">
+        <span class="credit__code" aria-hidden="true"><i>&lt;</i><i>/</i><i>&gt;</i></span>
+        Built with
+        <svg class="credit__heart" viewBox="0 0 24 22" width="24" height="22" aria-hidden="true" focusable="false">
+          <path d="M12 21.2 2.6 11.9C-.2 9.1-.1 4.6 2.8 2 5.5-.4 9.6.1 12 3c2.4-2.9 6.5-3.4 9.2-1 2.9 2.6 3 7.1.2 9.9z"></path>
+        </svg>
+        <span class="vh">love</span>
+        by <strong>Anik Sarker Akash</strong>
+      </p>
+      <p class="tagline">Automate the boring. Build the rare.</p>
+    </div>
+
+    <div class="foot__notes small">
+      <p>Smart Printing Solutions Ltd. supplies and services printers, copiers and toner for corporate customers across Bangladesh.</p>
+      <p>
+        Every status on this sheet is as of <time datetime={PROOF_DATE_ISO}>{PROOF_DATE}</time>. All data shown in the working
+        models is made up for the demonstration.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    padding-bottom: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+  }
+
+  .foot__bar {
+    display: grid;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    gap: 3px;
+    height: clamp(1.25rem, 1rem + 1vw, 2rem);
+  }
+
+  .foot__grid {
+    display: grid;
+    gap: 2rem clamp(2rem, 6vw, 6rem);
+    margin-top: clamp(2rem, 1.2rem + 3vw, 3.5rem);
+    align-items: end;
+  }
+
+  .credit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.1em 0.38em;
+    font-size: var(--step-2);
+    font-stretch: 80%;
+    font-weight: 450;
+    line-height: 1.15;
+    color: var(--blue);
+  }
+
+  .credit strong {
+    font-weight: 850;
+    color: var(--over);
+  }
+
+  .credit__code {
+    display: inline-flex;
+    font-weight: 800;
+    font-stretch: 100%;
+    margin-right: 0.1em;
+  }
+
+  .credit__code i {
+    display: inline-block;
+    font-style: normal;
+  }
+
+  .credit__heart {
+    width: 0.86em;
+    height: auto;
+    fill: var(--red);
+    transform-origin: 50% 60%;
+  }
+
+  /* The brackets open and close like the jaws of a paper clamp. The slash rocks. */
+  @keyframes open-left {
+    0%, 55%, 100% { transform: none; }
+    70%, 85% { transform: translate3d(-0.16em, 0, 0); }
+  }
+  @keyframes open-right {
+    0%, 55%, 100% { transform: none; }
+    70%, 85% { transform: translate3d(0.16em, 0, 0); }
+  }
+  @keyframes rock {
+    0%, 55%, 100% { transform: none; }
+    70%, 85% { transform: rotate(18deg); }
+  }
+  /* Two quick beats, then rest. */
+  @keyframes beat {
+    0%, 30%, 100% { transform: scale(1); }
+    8% { transform: scale(1.22); }
+    16% { transform: scale(0.96); }
+    23% { transform: scale(1.14); }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .credit__code i:nth-child(1) { animation: open-left 4.2s var(--ease-out) infinite; }
+    .credit__code i:nth-child(2) { animation: rock 4.2s var(--ease-out) infinite; }
+    .credit__code i:nth-child(3) { animation: open-right 4.2s var(--ease-out) infinite; }
+    .credit__heart { animation: beat 1.9s ease-in-out infinite; }
+  }
+
+  .tagline {
+    margin-top: 0.5rem;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: var(--step-2);
+    line-height: 1.15;
+    color: var(--over);
+  }
+
+  .foot__notes {
+    display: grid;
+    gap: 0.6rem;
+    max-width: 34rem;
+    color: var(--blue);
+  }
+
+  @media (min-width: 56rem) {
+    .foot__grid {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+  }
+</style>

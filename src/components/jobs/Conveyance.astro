@@ -1,0 +1,237 @@
+---
+// Job 3. The working model is one claim that collects its signatures and
+// becomes a printed bill.
+import Job from '../Job.astro';
+
+const boxes = [
+  { key: 'tl', label: 'Team Leader', d: 'M6 28c8-14 14-20 18-12s-6 16-2 14 10-18 16-16-2 14 4 13 8-12 14-12-3 11 3 11 12-6 24-9 22-3 30-2' },
+  { key: 'audit', label: 'Audit', d: 'M8 24c6-12 16-18 20-8 3 8-10 14-8 6s14-14 22-10-6 14 2 12 10-10 18-10 4 8 12 8 20-6 36-8' },
+  { key: 'mgr', label: 'Manager', d: 'M6 30 22 8l6 22 10-18 8 16c6-6 12-12 18-10s-4 10 4 10 22-8 40-10' },
+  { key: 'tier', label: 'Technical Head', d: 'M10 14c10-6 22-6 22 2s-18 14-20 10 14-12 26-10 2 12 10 12 10-10 18-12 6 10 14 10 18-4 30-8' },
+];
+---
+
+<Job id="conveyance" statusNote="A soft-launch check pass ran in October 2026.">
+  <div slot="moment" class="moment cnv" data-demo="conveyance" data-step="5">
+    <div class="moment__caption small">
+      <strong>Working model: one claim, signed stage by stage</strong>
+      <span>Made-up data</span>
+    </div>
+
+    <div class="cnv__bill">
+      <div class="cnv__head">
+        <strong>Conveyance bill</strong>
+        <span class="small">One travel day. One trip for each completed service call.</span>
+      </div>
+
+      <table class="cnv__trips small">
+        <caption class="vh">Trips and food on this claim</caption>
+        <tbody>
+          <tr><th scope="row">Service call 1</th><td>Office to customer, by CNG</td><td class="cnv__amt">৳ 180</td></tr>
+          <tr><th scope="row">Service call 2</th><td>Customer to customer, by rickshaw</td><td class="cnv__amt">৳ 60</td></tr>
+          <tr data-long hidden><th scope="row">Service call 3</th><td>Out of town, by car</td><td class="cnv__amt">৳ 1,800</td></tr>
+          <tr><th scope="row">Food</th><td>One meal</td><td class="cnv__amt">৳ 150</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><th scope="row" colspan="2">Total</th><td class="cnv__amt" data-total>৳ 390</td></tr>
+        </tfoot>
+      </table>
+
+      <ol class="cnv__sigs small" aria-label="Signature boxes">
+        {
+          boxes.map((b) => (
+            <li class="cnv__box" data-box={b.key} data-signed={b.key === 'tier' ? undefined : ''} hidden={b.key === 'tier'}>
+              <svg viewBox="0 0 120 40" aria-hidden="true" focusable="false">
+                <path d={b.d} pathLength="1" />
+              </svg>
+              <span class="cnv__who">{b.label}</span>
+              <span class="cnv__state" data-state>{b.key === 'tier' ? 'Waiting' : 'Signed'}</span>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="cnv__stamps">
+        <p class="stamp" data-stamp="approved">Approved</p>
+        <p class="stamp" data-stamp="processed">Processed</p>
+      </div>
+    </div>
+
+    <div class="moment__controls">
+      <button class="btn" type="button" data-next>Start a new claim</button>
+      <label class="check"><input type="checkbox" data-tier />Add a long trip. The claim then passes the amount tier.</label>
+    </div>
+
+    <p class="moment__say" role="status" data-say>
+      Accounts marked the claim processed. The bill prints with one signature box for each stage that signed.
+    </p>
+
+    <h3 id="cnv-log">Approval log. It only grows.</h3>
+    <ol class="cnv__log small" aria-labelledby="cnv-log" data-log>
+      <li>1. Submitted by the engineer. Total ৳ 390</li>
+      <li>2. Team Leader reviewed. Total ৳ 390</li>
+      <li>3. Audit reviewed. Total ৳ 390</li>
+      <li>4. Manager approved. Total ৳ 390</li>
+      <li>5. Accounts marked it processed. Total ৳ 390</li>
+    </ol>
+  </div>
+
+  <p class="remark">Filed in a minute. Signed stage by stage. Printed as one bill.</p>
+  <ul class="facts">
+    <li>One claim for each travel day. "Load this day's calls" builds one trip for each completed service call.</li>
+    <li>Each stage needs a different signer.</li>
+    <li>A stage that waits too long is forwarded to the next approver. The system never approves for a person.</li>
+    <li>The approval log only grows. The database refuses a change to a past row.</li>
+    <li>It works on a phone from 320 px wide, in English and Bangla with Bangla digits. Amounts are in Bangladeshi taka.</li>
+    <li>Engineers sign in through a one-time hand-off from the ticketing application.</li>
+    <li>A regression suite of more than 1,300 checks.</li>
+  </ul>
+  <p class="stack small"><b>Made with</b> PHP 8.2, MariaDB and plain JavaScript.</p>
+</Job>
+
+<style is:global>
+  .cnv__bill {
+    position: relative;
+    display: grid;
+    gap: 0.9rem;
+    padding: clamp(0.8rem, 0.5rem + 1.4vw, 1.4rem);
+    border: 1px solid var(--rule-strong);
+    border-radius: 3px;
+    background: #fff;
+    box-shadow: 3px 3px 0 rgb(12 82 163 / 0.18);
+  }
+
+  .cnv__head {
+    display: grid;
+    gap: 0.15rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1.5px solid var(--blue);
+    color: var(--blue);
+  }
+
+  .cnv__head strong {
+    font-size: var(--step-1);
+    font-stretch: 75%;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .cnv__trips {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .cnv__trips th,
+  .cnv__trips td {
+    padding: 0.4rem 0.5rem 0.4rem 0;
+    border-bottom: 1px dotted var(--rule-strong);
+    text-align: left;
+    vertical-align: top;
+    font-weight: 400;
+  }
+
+  .cnv__trips th {
+    font-weight: 650;
+    white-space: nowrap;
+  }
+
+  .cnv__trips tfoot th,
+  .cnv__trips tfoot td {
+    border-bottom: 0;
+    font-weight: 750;
+  }
+
+  .cnv__trips .cnv__amt {
+    padding-right: 0;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cnv__sigs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(6.2rem, 1fr));
+    gap: 0.5rem;
+  }
+
+  .cnv__box {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.35rem 0.5rem 0.45rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 3px;
+  }
+
+  .cnv__box[hidden] {
+    display: none;
+  }
+
+  .cnv__box svg {
+    width: 100%;
+    height: auto;
+    border-bottom: 1px solid var(--blue);
+  }
+
+  .cnv__box path {
+    fill: none;
+    stroke: var(--blue);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .cnv__box[data-signed] path {
+    stroke-dashoffset: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cnv__box path {
+      transition: stroke-dashoffset 520ms var(--ease-out);
+    }
+  }
+
+  .cnv__who {
+    font-weight: 650;
+    color: var(--over);
+  }
+
+  .cnv__state {
+    color: var(--blue);
+  }
+
+  .cnv__stamps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    min-height: 2.9rem;
+    padding-left: 0.2rem;
+  }
+
+  .cnv__stamps .stamp[hidden] {
+    display: none;
+  }
+
+  .cnv h3 {
+    margin-top: 0.6rem;
+  }
+
+  .cnv__log {
+    display: grid;
+    margin-top: 0.4rem;
+    font-family: var(--mono);
+    font-stretch: 100%;
+    line-height: 1.35;
+    min-height: 1.6rem;
+  }
+
+  .cnv__log li {
+    padding: 0.35rem 0;
+    border-bottom: 1px dotted var(--rule-strong);
+  }
+
+  .cnv__log li:empty {
+    display: none;
+  }
+</style>
