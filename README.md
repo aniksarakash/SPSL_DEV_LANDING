@@ -69,14 +69,15 @@ listens on `localhost` only, sends the pre-compressed files, gives hashed assets
 a one-year cache, and sets security headers.
 
 The page reaches the internet through a Cloudflare Tunnel, so this machine
-opens no inbound ports. Start the page and the tunnel together:
+opens no inbound ports. One script creates the tunnel and the DNS record, and
+installs two services that start with Windows and recover by themselves:
 
 ```powershell
-.\scripts\start.ps1 -Tunnel
+.\scripts\install-service.ps1 -Hostname <hostname>
 ```
 
-The set-up steps, the permanent Windows service and the handling of secrets are
-in [tunnel/README.md](tunnel/README.md).
+The details, the steps by hand and the handling of secrets are in
+[tunnel/README.md](tunnel/README.md).
 
 ## Where things are
 

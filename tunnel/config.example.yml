@@ -12,6 +12,6 @@ credentials-file: C:\Users\<user>\.cloudflared\<Tunnel-UUID>.json
 ingress:
   # The public hostname of the page, for example dev.example.com
   - hostname: <hostname>
-    service: http://localhost:4321
+    service: http://127.0.0.1:4321
   # Ingress rules must end with a rule that catches everything else.
   - service: http_status:404

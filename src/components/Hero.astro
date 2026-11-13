@@ -22,17 +22,27 @@ import { jobs, PROOF_DATE, PROOF_DATE_ISO } from '../data/jobs';
     </p>
   </div>
 
+  <p class="hero__kicker">
+    <span class="hero__dev">Developments</span>
+    <span class="hero__rule" aria-hidden="true"></span>
+    <span class="stamp hero__ongoing"><i class="hero__pulse" aria-hidden="true"></i>{jobs.length} projects ongoing</span>
+  </p>
+
   <Reg as="h1" text="Five jobs in proof." class="hero__title" scroll={false} />
 
   <div class="hero__row">
     <p class="hero__intro">
-      A proof is the print you check before the full run. This sheet is a proof of five pieces of software that Smart
-      Printing Solutions Ltd. has in development. It shows what each one does, and where it stands today.
+      Software development at Smart Printing Solutions Ltd.: five projects, all ongoing. A proof is the print you check
+      before the full run, and this sheet is that proof. It shows what each project does, and where it stands today.
     </p>
     <RegMark size={64} class="hero__mark" />
   </div>
 
-  <nav class="index" aria-label="The five jobs">
+  <nav class="index" aria-labelledby="ongoing">
+    <div class="index__head small">
+      <h2 id="ongoing">Projects ongoing</h2>
+      <p>Status as of <time datetime={PROOF_DATE_ISO}>{PROOF_DATE}</time></p>
+    </div>
     <ul>
       {
         jobs.map((job) => (
@@ -74,8 +84,78 @@ import { jobs, PROOF_DATE, PROOF_DATE_ISO } from '../data/jobs';
     max-width: 28rem;
   }
 
+  /* The section label of the sheet: what this is, and that the work is live. */
+  .hero__kicker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.7rem clamp(0.9rem, 2vw, 1.75rem);
+    margin-top: clamp(1.75rem, 0.6rem + 4.4vw, 4rem);
+  }
+
+  .hero__dev {
+    font-size: var(--step-2);
+    font-stretch: 62%;
+    font-weight: 850;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+
+  .hero__rule {
+    flex: 1 1 2rem;
+    min-width: 1.5rem;
+    max-width: 22rem;
+    height: 1.5px;
+    background: var(--blue);
+  }
+
+  .hero__ongoing {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    transform-origin: center;
+  }
+
+  .hero__pulse {
+    position: relative;
+    flex: none;
+    width: 0.6em;
+    height: 0.6em;
+    border-radius: 50%;
+    background: var(--red);
+  }
+
+  .hero__pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--red);
+    opacity: 0;
+  }
+
+  @keyframes ongoing {
+    from {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    70%,
+    to {
+      opacity: 0;
+      transform: scale(3);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__pulse::after {
+      animation: ongoing 2.2s var(--ease-out) infinite;
+    }
+  }
+
   .hero__title {
-    margin-top: clamp(1.75rem, 0.5rem + 5vw, 4.5rem);
+    margin-top: clamp(0.9rem, 0.4rem + 1.8vw, 1.75rem);
     font-size: var(--step-hero);
     /* A proof is allowed to sit a hair out of register. */
     --rx: 0.02em;
@@ -121,6 +201,25 @@ import { jobs, PROOF_DATE, PROOF_DATE_ISO } from '../data/jobs';
   .index {
     margin-top: clamp(2rem, 1rem + 4vw, 4rem);
     border-top: 1.5px solid var(--blue);
+  }
+
+  .index__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 2rem;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.7rem 0.25rem;
+    border-bottom: 1px solid var(--rule);
+    color: var(--blue);
+  }
+
+  .index__head h2 {
+    font-size: inherit;
+    font-stretch: 88%;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .index a {

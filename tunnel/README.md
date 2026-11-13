@@ -3,117 +3,134 @@
 The page is served from this Windows machine through a Cloudflare Tunnel. The
 machine opens no inbound ports. `cloudflared` makes an outbound connection to
 Cloudflare, and Cloudflare sends visitors down that connection to the local web
-server on `http://localhost:4321`.
+server on `http://127.0.0.1:4321`.
 
 These steps follow Cloudflare's documentation for a locally-managed tunnel, as
 read on 14 November 2026. Check the current documentation before you run them.
 
-## What changes your Cloudflare account
+## The short way
 
-Steps 2, 3 and 6 change the Cloudflare account. Step 7 puts the page on a
-public address. Do these only when you intend to.
+Two steps set up everything. Run them in an elevated PowerShell, from the
+project folder.
 
-## Steps
-
-1. Install `cloudflared`. Download the Windows build from Cloudflare, or run:
+1. Install `cloudflared` and sign in. The sign-in opens a browser. It saves
+   `cert.pem` in `C:\Users\<user>\.cloudflared\`.
 
    ```powershell
    winget install --id Cloudflare.cloudflared
+   cloudflared tunnel login
    ```
 
-2. Sign in. This opens a browser. It saves `cert.pem` in
-   `C:\Users\<user>\.cloudflared\`.
+2. Create the tunnel, the DNS record and the two services.
+
+   ```powershell
+   .\scripts\install-service.ps1 -Hostname <hostname>
+   ```
+
+The script changes the Cloudflare account: it creates a tunnel named
+`spsl-landing` and a CNAME record that points the hostname to
+`<Tunnel-UUID>.cfargotunnel.com`. It also puts the page on that public address.
+The script is safe to run again, for example after the project folder moves.
+
+## What keeps the page up
+
+| Part | How it starts | How it recovers |
+| --- | --- | --- |
+| `cloudflared` | A Windows service with start type "Automatic (Delayed Start)" | Windows restarts it after 5 s, 5 s, then every 30 s. `cloudflared` itself connects again when the network comes back. |
+| Local web server | A scheduled task named "SPSL landing page" that runs at startup as the system account | The task fires again every five minutes. If the server is running, nothing happens. If the server stopped, the task starts it. |
+
+After a power loss or a restart, both start with Windows. Nobody has to sign in
+to Windows or to Cloudflare. One thing is outside this machine: if it is a
+virtual machine, set the host to start the virtual machine automatically.
+
+The service runs as the system account. Its config and credentials are in
+`C:\Windows\System32\config\systemprofile\.cloudflared\`.
+
+Check the state at any time:
+
+```powershell
+Get-Service cloudflared
+Get-ScheduledTask -TaskName 'SPSL landing page'
+cloudflared tunnel info spsl-landing
+```
+
+After a change to the page, build it. The server reads the new files at once:
+
+```powershell
+npm run build
+```
+
+After a change to `server\serve.mjs`, restart the server:
+
+```powershell
+Stop-ScheduledTask -TaskName 'SPSL landing page'
+Start-ScheduledTask -TaskName 'SPSL landing page'
+```
+
+## HTTPS
+
+The local server sends a visitor who came over plain HTTP to HTTPS, and sets a
+`Strict-Transport-Security` header. No Cloudflare setting is needed for this.
+
+## The steps by hand
+
+Use these to run the tunnel in a console without the services, or to see what
+the script does. Steps 2 and 5 change the Cloudflare account. Step 6 puts the
+page on a public address.
+
+1. Sign in.
 
    ```powershell
    cloudflared tunnel login
    ```
 
-3. Create the tunnel. The command prints the tunnel UUID and writes the
-   credentials file `<Tunnel-UUID>.json` in the same `.cloudflared` folder.
-   That file is a secret.
+2. Create the tunnel. The command prints the tunnel UUID and writes the
+   credentials file `<Tunnel-UUID>.json` in the `.cloudflared` folder of your
+   user profile. That file is a secret.
 
    ```powershell
    cloudflared tunnel create spsl-landing
    ```
 
-4. Write the config. Copy `tunnel\config.example.yml` to
+3. Write the config. Copy `tunnel\config.example.yml` to
    `C:\Users\<user>\.cloudflared\spsl-landing.yml`. Replace `<Tunnel-UUID>`,
    `<user>` and `<hostname>`.
 
-5. Check the config.
+4. Check the config.
 
    ```powershell
    cloudflared tunnel --config $env:USERPROFILE\.cloudflared\spsl-landing.yml ingress validate
    ```
 
-6. Create the DNS record. This makes a CNAME record that points the hostname
-   to `<Tunnel-UUID>.cfargotunnel.com`. The record stays when the tunnel stops.
-   Visitors then see Cloudflare error 1016.
+5. Create the DNS record. The record stays when the tunnel stops. Visitors
+   then see Cloudflare error 1016.
 
    ```powershell
    cloudflared tunnel route dns spsl-landing <hostname>
    ```
 
-7. Start the page and the tunnel.
+6. Start the page and the tunnel in this console.
 
    ```powershell
    .\scripts\start.ps1 -Tunnel
    ```
 
-8. Confirm that the tunnel is connected.
+7. Confirm that the tunnel is connected.
 
    ```powershell
    cloudflared tunnel info spsl-landing
    ```
 
-## Run it permanently
-
-Two things must start with Windows: the local web server and `cloudflared`.
-
-### The local web server
-
-Create a scheduled task that starts at boot. Run this in an elevated
-PowerShell, with the real path of the project:
+## To remove it
 
 ```powershell
-$node = (Get-Command node).Source
-$action = New-ScheduledTaskAction -Execute $node -Argument 'server\serve.mjs' -WorkingDirectory 'C:\path\to\spsl-landing'
-$trigger = New-ScheduledTaskTrigger -AtStartup
-$settings = New-ScheduledTaskSettingsSet -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit ([TimeSpan]::Zero)
-Register-ScheduledTask -TaskName 'SPSL landing page' -Action $action -Trigger $trigger -Settings $settings -User 'SYSTEM' -RunLevel Highest
+Stop-Service cloudflared
+cloudflared service uninstall
+Unregister-ScheduledTask -TaskName 'SPSL landing page' -Confirm:$false
 ```
 
-### cloudflared as a Windows service
-
-Cloudflare recommends that `cloudflared` runs as a Windows service. The service
-runs as the system account, so it reads its files from the system profile and
-not from your user profile.
-
-1. In an elevated prompt:
-
-   ```bat
-   cloudflared.exe service install
-   mkdir C:\Windows\System32\config\systemprofile\.cloudflared
-   ```
-
-2. Copy `cert.pem`, `<Tunnel-UUID>.json` and the config file into
-   `C:\Windows\System32\config\systemprofile\.cloudflared\`. Name the config
-   `config.yml`. In it, set `credentials-file` to the new path of the
-   `.json` file.
-
-3. In Registry Editor, open
-   `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Cloudflared` and set
-   `ImagePath` to the following, with the real path of `cloudflared.exe`:
-
-   ```text
-   C:\Cloudflared\bin\cloudflared.exe --config=C:\Windows\System32\config\systemprofile\.cloudflared\config.yml tunnel run
-   ```
-
-4. Start the service. Restart it after each change to the config.
-
-   ```bat
-   sc start cloudflared
-   ```
+The tunnel and the DNS record stay in the Cloudflare account until you delete
+them there.
 
 ## Secrets
 

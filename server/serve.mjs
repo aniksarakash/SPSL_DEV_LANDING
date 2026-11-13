@@ -35,6 +35,8 @@ const SECURITY = {
   'X-Frame-Options': 'DENY',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
   'Cross-Origin-Opener-Policy': 'same-origin',
+  // Browsers act on this header only when the page came over HTTPS.
+  'Strict-Transport-Security': 'max-age=15552000',
   // The page loads nothing from other origins. Astro inlines its styles and small scripts.
   'Content-Security-Policy':
     "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
@@ -57,6 +59,12 @@ function send(res, status, headers, body) {
 const server = createServer(async (req, res) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     return send(res, 405, { Allow: 'GET, HEAD', 'Content-Type': 'text/plain' }, 'Method not allowed');
+  }
+
+  // Behind the tunnel, Cloudflare says which scheme the visitor used. A visitor
+  // who came over plain HTTP is sent to HTTPS. Local requests have no such header.
+  if (req.headers['x-forwarded-proto'] === 'http' && req.headers.host) {
+    return send(res, 301, { Location: `https://${req.headers.host}${req.url}`, 'Cache-Control': 'public, max-age=3600' });
   }
 
   let pathname;
