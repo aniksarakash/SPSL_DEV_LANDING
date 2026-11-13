@@ -228,7 +228,7 @@ The details, the steps by hand and the handling of secrets are in
 | `src/lib/fonts.ts` | The typefaces, and the fallback faces that stop the page from jumping while a font loads. |
 | `src/styles/global.css` | Inks, type, motion and the parts that sections share. |
 | `server/serve.mjs` | The local web server. |
-| `scripts/` | Build helpers, the Windows start script and the service installer. |
+| `scripts/` | Build helpers, the Windows start script, the service installer, and the script that draws the graphics of this file. |
 | `tunnel/` | The Cloudflare Tunnel config template and notes. |
 | `docs/readme/` | The animated graphics of this file. Their text is drawn as outlines of the page's own typefaces. |
 
