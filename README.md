@@ -2,10 +2,14 @@
 
 <img src="docs/readme/logo-ink.webp" width="340" alt="Smart Printing Solutions Ltd. The logo forms out of blue ink." />
 
-<img src="docs/readme/banner.svg" width="100%" alt="Developments. Five jobs in proof. Software in development at Smart Printing Solutions Ltd. Five projects, all ongoing." />
+<a href="https://dev.spslts.com"><img src="docs/readme/banner.svg" width="100%" alt="Developments. Five jobs in proof. Software in development at Smart Printing Solutions Ltd. Five projects, all ongoing." /></a>
 
 <p>
-  <img src="https://img.shields.io/badge/status-live-0C52A3?style=for-the-badge" alt="Status: live" />
+  <a href="https://dev.spslts.com"><img src="https://img.shields.io/badge/Open%20the%20live%20page-dev.spslts.com-F03C24?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Open the live page: dev.spslts.com" height="38" /></a>
+</p>
+
+<p>
+  <a href="https://dev.spslts.com"><img src="https://img.shields.io/badge/status-live-0C52A3?style=for-the-badge" alt="Status: live" /></a>
   <img src="https://img.shields.io/badge/projects-5%20ongoing-F03C24?style=for-the-badge" alt="5 projects ongoing" />
   <img src="https://img.shields.io/badge/Lighthouse-100%20%C2%B7%20100%20%C2%B7%20100%20%C2%B7%20100-0C52A3?style=for-the-badge&logo=lighthouse&logoColor=white" alt="Lighthouse: 100 in all four categories" />
   <img src="https://img.shields.io/badge/WCAG-2.2%20AA-0B1317?style=for-the-badge" alt="WCAG 2.2 AA" />
@@ -22,6 +26,7 @@
 </p>
 
 <p>
+  <a href="https://dev.spslts.com"><b>Live page</b></a> ·
   <a href="#the-idea">The idea</a> ·
   <a href="#the-five-jobs">The five jobs</a> ·
   <a href="#measured">Measured</a> ·
@@ -36,6 +41,8 @@
 ---
 
 ## The idea
+
+**Live at [dev.spslts.com](https://dev.spslts.com).**
 
 The page is a printer's **proof sheet**. A proof is the print that you check
 before the full run, and these five projects are software that is still being
