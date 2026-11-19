@@ -1,5 +1,5 @@
 // Runs the Astro command line with a Node version that Astro supports.
-// Astro 7.4.11 needs Node >= 22.23.4. If the system Node is older, this
+// Astro 7.4.13 needs Node >= 22.23.4. If the system Node is older, this
 // launcher uses the pinned Node binary from the `node-win-x64` dev dependency.
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';

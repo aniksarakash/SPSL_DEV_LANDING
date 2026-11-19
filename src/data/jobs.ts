@@ -8,8 +8,8 @@ export interface JobSummary {
   status: string;
 }
 
-export const PROOF_DATE = '14 November 2026';
-export const PROOF_DATE_ISO = '2026-11-14';
+export const PROOF_DATE = '19 November 2026';
+export const PROOF_DATE_ISO = '2026-11-19';
 
 export const jobs: JobSummary[] = [
   {
