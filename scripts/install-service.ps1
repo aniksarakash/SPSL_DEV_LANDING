@@ -13,6 +13,8 @@
        and restarts when it fails.
     5. Installs a scheduled task that starts the local web server with
        Windows, and starts it again within five minutes if it stops.
+    6. Installs a scheduled task that starts the cloudflared service again
+       within five minutes if it stops.
 
   After a power loss or a restart of the machine, both come back with no
   sign-in. Steps 1 and 2 change the Cloudflare account.
@@ -21,7 +23,8 @@ param(
   [Parameter(Mandatory)][string]$Hostname,
   [string]$TunnelName = 'spsl-landing',
   [int]$Port = 4321,
-  [string]$TaskName = 'SPSL landing page'
+  [string]$TaskName = 'SPSL landing page',
+  [string]$CheckTaskName = 'SPSL landing tunnel check'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -124,8 +127,9 @@ if (-not (Get-Service cloudflared -ErrorAction SilentlyContinue)) {
 Stop-Service cloudflared -Force -ErrorAction SilentlyContinue
 $imagePath = "`"$cloudflared`" --config=$systemConfig tunnel run"
 Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Cloudflared' -Name ImagePath -Value $imagePath
-# Start with Windows, a little after boot, when the network is up.
-Invoke-Native -Exe 'sc.exe' -Arguments 'config', 'cloudflared', 'start=', 'delayed-auto' -Quiet | Out-Null
+# Start with Windows, as soon as the network stack and the DNS client run.
+# "Delayed start" made the tunnel wait about three minutes after a boot.
+Invoke-Native -Exe 'sc.exe' -Arguments 'config', 'cloudflared', 'start=', 'auto', 'depend=', 'Tcpip/Dnscache' -Quiet | Out-Null
 # Recovery: restart after 5 s, 5 s, then every 30 s. Count failures again after one day.
 Invoke-Native -Exe 'sc.exe' -Arguments 'failure', 'cloudflared', 'reset=', '86400', 'actions=', 'restart/5000/restart/5000/restart/30000' -Quiet | Out-Null
 # Also recover when the service stops with an error but does not crash.
@@ -144,6 +148,17 @@ $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccou
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $atStartup, $keepAlive `
   -Settings $settings -Principal $principal -Force | Out-Null
 
+# --- 6. A check on the tunnel service ------------------------------------------
+# Windows restarts the service when it stops with an error. This task covers a
+# stop with no error: every five minutes it asks Windows to start the service.
+# If the service is running, the request does nothing.
+$checkAction = New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\sc.exe" -Argument 'start cloudflared'
+$checkEvery = New-ScheduledTaskTrigger -Once -At (Get-Date).Date -RepetitionInterval (New-TimeSpan -Minutes 5)
+$checkSettings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -StartWhenAvailable `
+  -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 1)
+Register-ScheduledTask -TaskName $CheckTaskName -Action $checkAction -Trigger $checkEvery `
+  -Settings $checkSettings -Principal $principal -Force | Out-Null
+
 # --- Start -------------------------------------------------------------------
 if (-not (Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)) {
   Start-ScheduledTask -TaskName $TaskName
@@ -155,5 +170,6 @@ $listening = [bool](Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAc
 Write-Host ''
 Write-Host "cloudflared service : $((Get-Service cloudflared).Status), start type $((Get-Service cloudflared).StartType)"
 Write-Host "web server task     : $((Get-ScheduledTask -TaskName $TaskName).State)"
+Write-Host "tunnel check task   : $((Get-ScheduledTask -TaskName $CheckTaskName).State)"
 Write-Host "local server        : $(if ($listening) { "listening on port $Port" } else { 'NOT listening' })"
 Invoke-Native -Exe $cloudflared -Arguments 'tunnel', 'info', $TunnelName
