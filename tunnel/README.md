@@ -37,7 +37,7 @@ The script is safe to run again, for example after the project folder moves.
 | Part | How it starts | How it recovers |
 | --- | --- | --- |
 | `cloudflared` | A Windows service with start type "Automatic". It starts when the network stack and the DNS client run. | When it stops with an error, Windows restarts it after 5 s, 5 s, then every 30 s. `cloudflared` itself connects again when the network comes back. |
-| Tunnel check | A scheduled task named "SPSL landing tunnel check" that fires every five minutes as the system account | It asks Windows to start the `cloudflared` service. If the service is running, nothing happens. This covers a stop with no error. |
+| Tunnel check | A scheduled task named "SPSL landing tunnel check" that fires every minute as the system account | It asks Windows to start the `cloudflared` service. If the service is running, nothing happens. This covers a stop with no error. |
 | Local web server | A scheduled task named "SPSL landing page" that runs at startup as the system account | The task fires again every five minutes. If the server is running, nothing happens. If the server stopped, the task starts it. |
 
 After a power loss or a restart, both start with Windows. Nobody has to sign in
@@ -47,7 +47,7 @@ virtual machine, set the host to start the virtual machine automatically.
 The service does not use "Automatic (Delayed Start)". With that start type,
 Windows waited about three minutes after a boot before it started the tunnel.
 
-To stop the tunnel for more than five minutes, disable the check task first.
+To stop the tunnel for more than one minute, disable the check task first.
 If you do not, the task starts the service again:
 
 ```powershell

@@ -144,7 +144,7 @@ flowchart TD
     W --> B["Scheduled task: local web server<br/>runs at startup"]
 
     A --> T{"Tunnel connected?"}
-    T -- "no" --> R1["Windows restarts the service<br/>after 5 s, 5 s, then every 30 s.<br/>A check task starts it again<br/>every 5 minutes"]
+    T -- "no" --> R1["Windows restarts the service<br/>after 5 s, 5 s, then every 30 s.<br/>A check task starts it again<br/>every minute"]
     R1 --> T
 
     B --> L{"Server listening?"}
@@ -165,7 +165,7 @@ flowchart TD
 | --- | --- |
 | `cloudflared` was killed | A new process started after 5.2 s. The page answered again 1.5 s later. |
 | The local web server was killed | The scheduled task started it again after 71 s. The worst case is 5 minutes. |
-| The `cloudflared` service was stopped with no error | The check task started it again in 1 s when it ran. The worst case is 5 minutes. |
+| The `cloudflared` service was stopped with no error | The check task started it again after 9 s. The worst case is 1 minute. |
 | The machine lost power on 19 November 2026 | The page came back with no sign-in. The tunnel started 3 min 22 s after Windows, because the service then used delayed start. The service now starts with the network. That change is not yet tested with a real restart. |
 
 ## From an edit to the live page

@@ -14,7 +14,7 @@
     5. Installs a scheduled task that starts the local web server with
        Windows, and starts it again within five minutes if it stops.
     6. Installs a scheduled task that starts the cloudflared service again
-       within five minutes if it stops.
+       within one minute if it stops.
 
   After a power loss or a restart of the machine, both come back with no
   sign-in. Steps 1 and 2 change the Cloudflare account.
@@ -150,10 +150,10 @@ Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $atStartup, 
 
 # --- 6. A check on the tunnel service ------------------------------------------
 # Windows restarts the service when it stops with an error. This task covers a
-# stop with no error: every five minutes it asks Windows to start the service.
+# stop with no error: every minute it asks Windows to start the service.
 # If the service is running, the request does nothing.
 $checkAction = New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\sc.exe" -Argument 'start cloudflared'
-$checkEvery = New-ScheduledTaskTrigger -Once -At (Get-Date).Date -RepetitionInterval (New-TimeSpan -Minutes 5)
+$checkEvery = New-ScheduledTaskTrigger -Once -At (Get-Date).Date -RepetitionInterval (New-TimeSpan -Minutes 1)
 $checkSettings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -StartWhenAvailable `
   -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 1)
 Register-ScheduledTask -TaskName $CheckTaskName -Action $checkAction -Trigger $checkEvery `
